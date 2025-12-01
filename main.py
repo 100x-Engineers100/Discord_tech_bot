@@ -181,6 +181,6 @@ async def on_message(message):
                         await asyncio.sleep(1)
                         chunk = chunk[1800:]
 
-# Run the bot
+if __name__ == "__main__":
     start_web_server_thread() # Start the web server
-bot.run(DISCORD_BOT_TOKEN)
+    bot.run(DISCORD_BOT_TOKEN)
