@@ -27,7 +27,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
-
+from flask import Flask
+from threading import Thread
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
@@ -544,28 +545,49 @@ async def on_message(message):
                 "I encountered an error while processing your question. "
                 "Please try rephrasing or contact a mentor if the issue persists."
             )
+# ============================================================================
+# FLASK KEEP-ALIVE SERVER (for Render free tier)
+# ============================================================================
 
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Discord bot is running! ✅", 200
+
+@app.route('/health')
+def health():
+    return {"status": "healthy", "bot": bot.user.name if bot.user else "Not ready"}, 200
+
+def run_flask():
+    """Run Flask server in background thread"""
+    port = int(os.getenv("PORT", 8080))
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
+
+def start_flask_server():
+    """Start Flask in daemon thread"""
+    flask_thread = Thread(target=run_flask, daemon=True)
+    flask_thread.start()
+    print(f"✓ Flask keep-alive server started on port {os.getenv('PORT', 8080)}")
 
 # ============================================================================
 # BOT STARTUP
 # ============================================================================
 
 if __name__ == "__main__":
-    """
-    Entry point: Start the Discord bot.
-    
-    Note: The bot runs indefinitely until manually stopped (Ctrl+C)
-    or the process is killed by the hosting platform.
-    """
     if not DISCORD_BOT_TOKEN:
         print("ERROR: DISCORD_BOT_TOKEN not found in environment variables")
-        print("Please create a .env file with your bot token")
         exit(1)
     
     if not OPENAI_API_KEY:
         print("ERROR: OPENAI_API_KEY not found in environment variables")
-        print("Please add your OpenAI API key to .env file")
         exit(1)
+    
+    print("Starting Flask keep-alive server...")
+    start_flask_server()
+    
+    print("Starting Discord bot...")
+    bot.run(DISCORD_BOT_TOKEN)
     
     print("Starting Discord bot...")
     bot.run(DISCORD_BOT_TOKEN)
