@@ -316,9 +316,9 @@ CONVERSATION HISTORY:
 {format_history_for_prompt(history)}
 
 HOW TO RESPOND:
-1. **Break it down**: Use step-by-step format
-   - Numbered steps for processes
-   - Bullet points for concepts
+1. **Break it down**: Use step-by-step format in brief
+   
+   - Break down complex concepts step-by-step in brief
    - Code blocks for technical examples
 
 2. **Connect to curriculum**: Reference specific lectures(strictly)
@@ -361,7 +361,7 @@ Goal: Provide clear, curriculum-grounded technical help."""
             response = openai_client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=messages,
-                max_tokens=600,  # Limit response length
+                max_tokens=400,  # Limit response length
                 temperature=0.7  # Balance between creativity and consistency
             )
             
